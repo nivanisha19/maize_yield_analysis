@@ -1,0 +1,95 @@
+---
+title: "Maize Yield Uniformity Trial Analysis"
+author: "sriniva sagathevan"
+date: "2026-09-10"
+output: html_document
+---
+
+### INTRODUCTION
+This project uses a maize uniformity trial dataset (Saunders) to answer two questions:
+1) was average yield higher in 1930 than in 1929, and does yield vary across field row
+2) position, with a similar pattern in both years?
+
+## data viewing
+
+```{r}
+library(agridat)
+library(tidyverse) 
+library(ggplot2) 
+```
+
+## data understanding
+
+```{r}
+data("saunders.maize.uniformity")
+nrow(saunders.maize.uniformity)
+ncol(saunders.maize.uniformity)
+head(saunders.maize.uniformity)
+?saunders.maize.uniformity
+summary(saunders.maize.uniformity)
+```
+
+## data cleaning
+
+```{r}
+sum(is.na(saunders.maize.uniformity$row))
+sum(is.na(saunders.maize.uniformity$col))
+sum(is.na(saunders.maize.uniformity$year))
+sum(is.na(saunders.maize.uniformity$yield))
+boxplot(saunders.maize.uniformity$yield)$out
+```
+
+The dataset had 17 missing yield values and one outlier (19.9), both removed before analysis.
+
+```{r}
+saunder_cleaned <- saunders.maize.uniformity %>%
+  select(row,col,yield,year) %>%
+  filter(complete.cases(.)) %>%
+  filter(yield !=19.9)
+
+nrow(saunder_cleaned)
+boxplot(saunder_cleaned)$out
+```
+
+
+### data manipulation
+Analysis: Yield by Year
+
+```{r}
+saunder_cleaned <- saunders.maize.uniformity %>%
+  select(row,col,yield,year) %>%
+  filter(complete.cases(.)) %>%
+  filter(yield !=19.9) %>%
+  group_by(year) %>%
+  summarise(average_yield=mean(yield)) %>%
+  arrange(desc(average_yield))
+
+saunder_cleaned
+```
+
+## Visualization: Yield by Row Position
+
+```{r}
+saunder_cleaned2 <- saunders.maize.uniformity %>%
+  select(row, col, yield, year) %>%
+  filter(complete.cases(.)) %>%
+  filter(yield != 19.9)
+
+ggplot(saunder_cleaned2
+       , aes(x = row, y = yield, color = factor(year))) +
+  geom_point(size=1,alpha=1)+
+labs(title="Maize yield by field row position")
+```
+
+### conclusion 
+ this project answers two question 
+1) was the average yield higher in 1930 than in 1929 
+ans : the yield was increased from 1929 to 1930
+
+2)Does yield vary across field row
+ans : yes, it varied and follows a pattern in both the year 1929 and 1930.
+
+
+
+
+
